@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIT Internal Hub</title>
+
+  <!-- ============================================================
+       FAVICON — inline SVG (segitiga merah AIT)
+  ============================================================ -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='50,5 95,95 5,95' fill='%238B1A1A'/></svg>" />
+
+  <!-- ============================================================
+       FONTS
+  ============================================================ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       CSS VARIABLES — edit here untuk ganti branding
+    ============================================================ */
+    :root {
+      --bg:          #080808;
+      --bg-2:        #101010;
+      --bg-3:        #161616;
+      --red:         #8B1A1A;
+      --red-bright:  #C0392B;
+      --red-glow:    rgba(139, 26, 26, 0.4);
+      --white:       #F5F5F5;
+      --gray:        #888;
+      --gray-2:      #444;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-mono:    'DM Mono', monospace;
+      --font-body:    'Inter', sans-serif;
+      --radius:       6px;
+      --transition:   0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      cursor: none;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ============================================================
+       CUSTOM CURSOR
+    ============================================================ */
+    #cursor {
+      position: fixed;
+      top: 0; left: 0;
+      width: 14px; height: 14px;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, opacity 0.3s;
+    }
+    #cursor svg { width: 100%; height: 100%; }
+    #cursor-trail {
+      position: fixed;
+      top: 0; left: 0;
+      width: 36px; height: 36px;
+      border: 1px solid var(--red);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.35s ease, opacity 0.3s;
+      opacity: 0.5;
+    }
+
+    /* ============================================================
+       NOISE OVERLAY
+    ============================================================ */
+    #noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px;
+      animation: noiseAnim 0.5s steps(2) infinite;
+    }
+    @keyframes noiseAnim {
+      0%   { background-position: 0 0; }
+      25%  { background-position: 50px -50px; }
+      50%  { background-position: -50px 50px; }
+      75%  { background-position: 30px -30px; }
+      100% { background-position: 0 0; }
+    }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(8,8,8,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(139,26,26,0.2);
+      transition: padding var(--transition);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .nav-logo span { color: var(--red-bright); }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray);
+      transition: color var(--transition);
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: var(--red-bright);
+      transition: width var(--transition);
+    }
+    .nav-links a:hover { color: var(--white); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px; height: 2px;
+      background: var(--white);
+      transition: var(--transition);
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* mobile nav */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(8,8,8,0.97);
+      z-index: 99;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      letter-spacing: 0.1em;
+      color: var(--gray);
+      transition: color var(--transition);
+    }
+    .mobile-nav a:hover { color: var(--red-bright); }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      overflow: hidden;
+    }
+
+    /* geometric grid bg */
+    #hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(139,26,26,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,26,26,0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 1; }
+    }
+
+    /* canvas particles */
+    #particles { position: absolute; inset: 0; }
+
+    /* logo assembly */
+    .hero-logo {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 2rem;
+      cursor: pointer;
+    }
+    .hero-logo svg {
+      width: clamp(160px, 30vw, 320px);
+      filter: drop-shadow(0 0 40px rgba(139,26,26,0.5));
+      transition: filter var(--transition);
+    }
+    .hero-logo:hover svg {
+      filter: drop-shadow(0 0 80px rgba(192,57,43,0.9));
+      animation: logoShake 0.4s ease;
+    }
+    @keyframes logoShake {
+      0%,100% { transform: rotate(0deg); }
+      20%      { transform: rotate(-3deg) scale(1.05); }
+      40%      { transform: rotate(3deg) scale(1.08); }
+      60%      { transform: rotate(-2deg) scale(1.05); }
+      80%      { transform: rotate(1deg); }
+    }
+
+    /* triangle pieces for assembly animation */
+    .tri-left, .tri-right, .tri-center {
+      transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 1s ease;
+    }
+    body:not(.loaded) .tri-left   { transform: translateX(-80px) translateY(40px); opacity: 0; }
+    body:not(.loaded) .tri-right  { transform: translateX(80px) translateY(40px);  opacity: 0; }
+    body:not(.loaded) .tri-center { transform: translateY(60px); opacity: 0; }
+
+    .hero-title {
+      position: relative;
+      z-index: 2;
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 8vw, 7rem);
+      letter-spacing: 0.08em;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+    }
+    .hero-title .char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .hero-subtitle {
+      position: relative;
+      z-index: 2;
+      font-family: var(--font-mono);
+      font-size: clamp(0.65rem, 1.8vw, 0.9rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--red-bright);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transition: opacity 1s ease 1.5s;
+    }
+    .hero-tagline {
+      position: relative;
+      z-index: 2;
+      font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+      color: var(--gray);
+      max-width: 560px;
+      opacity: 0;
+      transition: opacity 1s ease 1.8s;
+    }
+    .hero-tagline em { color: var(--white); font-style: normal; }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 1s ease 2.2s;
+    }
+    .hero-scroll span {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gray-2);
+    }
+    .scroll-line {
+      width: 1px; height: 50px;
+      background: linear-gradient(to bottom, var(--red-bright), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%,100% { transform: scaleY(1); opacity: 1; }
+      50%      { transform: scaleY(0.6); opacity: 0.4; }
+    }
+
+    /* loaded state */
+    body.loaded .char         { opacity: 1; transform: translateY(0); }
+    body.loaded .hero-subtitle,
+    body.loaded .hero-tagline,
+    body.loaded .hero-scroll  { opacity: 1; }
+    body.loaded .tri-left,
+    body.loaded .tri-right,
+    body.loaded .tri-center   { transform: none; opacity: 1; }
+
+    /* ============================================================
+       STATS
+    ============================================================ */
+    #stats {
+      position: relative;
+      z-index: 2;
+      background: var(--bg-2);
+      border-top: 1px solid rgba(139,26,26,0.3);
+      border-bottom: 1px solid rgba(139,26,26,0.3);
+      padding: 3rem 2rem;
+    }
+    .stats-grid {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--red-bright);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-top: 0.4rem;
+    }
+
+    /* ============================================================
+       SECTION SHARED
+    ============================================================ */
+    section {
+      position: relative;
+      z-index: 2;
+      padding: 6rem 2rem;
+    }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--red-bright);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 24px; height: 1px;
+      background: var(--red-bright);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      margin-bottom: 2rem;
+    }
+
+    /* reveal on scroll */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ============================================================
+       ABOUT
+    ============================================================ */
+    #about { background: var(--bg); }
+    .about-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+      margin-top: 3rem;
+    }
+    .about-text p {
+      color: var(--gray);
+      line-height: 1.8;
+      margin-bottom: 1.2rem;
+      font-size: 0.95rem;
+    }
+    .about-text p em { color: var(--white); font-style: normal; font-weight: 500; }
+    .disclaimer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(139,26,26,0.15);
+      border: 1px solid rgba(139,26,26,0.4);
+      border-radius: var(--radius);
+      padding: 0.5rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: var(--red-bright);
+      margin-bottom: 2rem;
+      animation: badgePulse 3s ease-in-out infinite;
+    }
+    @keyframes badgePulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(139,26,26,0.3); }
+      50%      { box-shadow: 0 0 0 8px rgba(139,26,26,0); }
+    }
+    .about-pillars { display: flex; flex-direction: column; gap: 1.5rem; }
+    .pillar {
+      background: var(--bg-3);
+      border: 1px solid var(--bg-3);
+      border-left: 3px solid var(--red);
+      border-radius: var(--radius);
+      padding: 1.2rem 1.5rem;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .pillar:hover {
+      border-left-color: var(--red-bright);
+      background: rgba(139,26,26,0.05);
+    }
+    .pillar-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+    .pillar-title {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.3rem;
+    }
+    .pillar p { font-size: 0.85rem; color: var(--gray); }
+
+    /* ============================================================
+       TOOLS — easy to add more cards here
+    ============================================================ */
+    #tools { background: var(--bg-2); }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .tool-card {
+      position: relative;
+      background: var(--bg-3);
+      border: 1px solid var(--gray-2);
+      border-radius: var(--radius);
+      padding: 2rem;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color var(--transition), transform var(--transition);
+      transform-style: preserve-3d;
+    }
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(139,26,26,0.08), transparent);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .tool-card:hover {
+      border-color: var(--red-bright);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(139,26,26,0.25);
+    }
+    .tool-card:hover::before { opacity: 1; }
+
+    /* launch animation */
+    .tool-card.launching { animation: launch 0.5s ease forwards; }
+    @keyframes launch {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(0.97); }
+      70%  { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    .tool-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--red-bright);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tool-tag::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--red-bright);
+      animation: blink 1.5s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .tool-name {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .tool-desc {
+      font-size: 0.88rem;
+      color: var(--gray);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+    .tool-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.8rem;
+    }
+    .tool-feature {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      padding: 0.25rem 0.6rem;
+      background: rgba(139,26,26,0.1);
+      border: 1px solid rgba(139,26,26,0.3);
+      border-radius: 3px;
+      color: var(--gray);
+    }
+    .tool-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--white);
+      transition: gap var(--transition);
+    }
+    .tool-card:hover .tool-cta { gap: 1.2rem; }
+    .tool-cta-arrow {
+      width: 32px; height: 32px;
+      border: 1px solid var(--red);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .tool-card:hover .tool-cta-arrow {
+      background: var(--red-bright);
+      border-color: var(--red-bright);
+    }
+
+    /* launch progress bar */
+    .tool-progress {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: var(--red-bright);
+      width: 0;
+      transition: width 0.6s ease;
+    }
+    .tool-card.launching .tool-progress { width: 100%; }
+
+    /* ============================================================
+       TEAM
+    ============================================================ */
+    #team { background: var(--bg); }
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .team-card {
+      perspective: 800px;
+      cursor: pointer;
+    }
+    .team-card-inner {
+      position: relative;
+      width: 100%;
+      padding-top: 130%;
+      transform-style: preserve-3d;
+      transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .team-card:hover .team-card-inner,
+    .team-card.flipped .team-card-inner { transform: rotateY(180deg); }
+    .team-front, .team-back {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid var(--gray-2);
+      background: var(--bg-3);
+    }
+    .team-back {
+      transform: rotateY(180deg);
+      background: rgba(139,26,26,0.08);
+      border-color: var(--red);
+    }
+    .team-avatar {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--bg-2);
+      border: 2px solid var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      color: var(--red-bright);
+      margin-bottom: 1rem;
+      box-shadow: 0 0 20px rgba(139,26,26,0.3);
+    }
+    /* Vina special */
+    .team-avatar.female {
+      border-color: #c0789a;
+      color: #c0789a;
+      box-shadow: 0 0 20px rgba(192,120,154,0.3);
+    }
+    .team-name {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2rem;
+    }
+    .team-title-front {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+    .team-role {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      color: var(--red-bright);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.8rem;
+    }
+    .team-bio {
+      font-size: 0.78rem;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+    .team-hint {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray-2);
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      position: relative;
+      z-index: 2;
+      background: var(--bg-2);
+      border-top: 1px solid rgba(139,26,26,0.2);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .footer-logo span { color: var(--red-bright); }
+    .footer-sub {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 2rem;
+    }
+    .footer-divider {
+      width: 60px; height: 1px;
+      background: var(--red);
+      margin: 0 auto 2rem;
+    }
+    .footer-built {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: var(--gray-2);
+    }
+    .footer-built em {
+      color: var(--red-bright);
+      font-style: normal;
+    }
+    .footer-disclaimer {
+      margin-top: 0.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--gray-2);
+    }
+    .footer-disclaimer span { color: var(--gray); }
+
+    /* ============================================================
+       SCROLL PROGRESS BAR
+    ============================================================ */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 2px;
+      background: var(--red-bright);
+      z-index: 200;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 8px var(--red-bright);
+    }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+
+      .about-body { grid-template-columns: 1fr; gap: 2rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .team-grid  { grid-template-columns: repeat(2, 1fr); }
+
+      section { padding: 4rem 1.5rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .team-grid  { grid-template-columns: repeat(2, 1fr); }
+      .tools-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Noise overlay -->
+<div id="noise"></div>
+
+<!-- Scroll progress bar -->
+<div id="progress-bar"></div>
+
+<!-- Custom cursor -->
+<div id="cursor">
+  <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="7,0 14,14 0,14" fill="#8B1A1A"/>
+  </svg>
+</div>
+<div id="cursor-trail"></div>
+
+<!-- ============================================================
+     NAV
+============================================================ -->
+<nav>
+  <div class="nav-logo">A<span>I</span>T</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#tools">Tools</a></li>
+    <li><a href="#team">Team</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#about"  onclick="closeMobileNav()">About</a>
+  <a href="#tools"  onclick="closeMobileNav()">Tools</a>
+  <a href="#team"   onclick="closeMobileNav()">Team</a>
+</div>
+
+<!-- ============================================================
+     HERO
+============================================================ -->
+<section id="hero">
+  <div id="hero-grid"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- Click logo to trigger shake + explosion -->
+  <div class="hero-logo" id="hero-logo" title="Click me!">
+    <svg viewBox="0 0 724.02 147.65" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- ══ A — white outer shape ══ -->
+      <polygon class="tri-left"
+        points="232.41 0 115.02 146.61 194.32 146.61 263.19 55.04 325.8 147.65 398.84 147.65 304.41 0 232.41 0"
+        fill="white"/>
+
+      <!-- ══ A — red inner triangle ══ -->
+      <polygon class="tri-center"
+        points="218.84 147.65 252.5 98.87 270.5 98.87 300.23 147.65 218.84 147.65"
+        fill="#991d20"/>
+
+      <!-- ══ I — vertical bar ══ -->
+      <polygon class="tri-right"
+        points="378.5 0 439.54 0 439.54 147.65 413.15 147.65 378.5 95.61 378.5 0"
+        fill="white"/>
+
+      <!-- ══ T ══ -->
+      <polygon class="tri-right"
+        points="449.71 0 449.71 43.17 544.02 43.17 544.02 147.65 603.89 147.65 603.89 43.17 697.41 43.17 724.02 0 449.71 0"
+        fill="white"/>
+
+    </svg>
+  </div>
+
+  <h1 class="hero-title" id="hero-title" aria-label="ALPHA INNOVATION TECHNOLOGY"></h1>
+  <p class="hero-subtitle">Internal Hub — Unofficial Edition</p>
+  <p class="hero-tagline">
+    Powering the Future of AI <em>with Human Intelligence</em> —<br>and a little bit of chaos.
+  </p>
+
+  <div class="hero-scroll">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     STATS
+============================================================ -->
+<div id="stats">
+  <div class="stats-grid">
+    <div class="reveal">
+      <div class="stat-number" data-target="500000" data-suffix="K+">0</div>
+      <div class="stat-label">Annotated Assets/Month</div>
+    </div>
+    <div class="reveal">
+      <div class="stat-number" data-target="99.2" data-suffix="%" data-decimal>0</div>
+      <div class="stat-label">Quality Accuracy</div>
+    </div>
+    <div class="reveal">
+      <div class="stat-number" data-target="500" data-suffix="+">0</div>
+      <div class="stat-label">AI Specialists</div>
+    </div>
+    <div class="reveal">
+      <div class="stat-number" data-target="15" data-suffix="+">0</div>
+      <div class="stat-label">Enterprise Clients</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ABOUT
+============================================================ -->
+<section id="about">
+  <div class="section-inner">
+    <div class="section-label reveal">Who We Are</div>
+    <h2 class="section-title reveal">Bridging Academia<br>&amp; Industry</h2>
+
+    <div class="about-body">
+      <div class="about-text reveal">
+        <div class="disclaimer-badge">⚠️ UNOFFICIAL — Made by Ancur Ini Tim</div>
+        <p>
+          <em>Alpha Innovation Technology (AIT)</em> is an Indonesian-based AI services company specializing in
+          high-quality data annotation and AI resource development — sitting at the intersection of
+          cutting-edge academic research and real-world enterprise AI needs.
+        </p>
+        <p>
+          Through our exclusive partnership with the <em>Faculty of Artificial Intelligence and Data Science (FAIDAS)</em>
+          at Universitas Pelita Harapan (UPH), we deliver world-class annotation services to global enterprises,
+          including Fortune 500 technology companies.
+        </p>
+        <p>
+          We are proudly backed by <em>Multipolar Technology (IDX: MLPT)</em> — 50+ years of industry trust,
+          15+ global awards in 2025, and deep partnerships with Microsoft, Google, IBM, and more.
+        </p>
+        <p style="color: #555; font-size: 0.8rem; font-style: italic;">
+          This page is an unofficial internal hub. All info here is real — the vibes are extra.
+        </p>
+      </div>
+      <div class="about-pillars reveal">
+        <div class="pillar">
+          <div class="pillar-icon">🎯</div>
+          <div class="pillar-title">Our Mission</div>
+          <p>Accelerate global AI advancement by delivering precision data annotation and cultivating world-class AI talent from Indonesia.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🔭</div>
+          <div class="pillar-title">Our Vision</div>
+          <p>Become the leading AI data services partner for top-tier technology companies across North America, Europe, and Asia-Pacific.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-icon">🤝</div>
+          <div class="pillar-title">Our Edge</div>
+          <p>Exclusive academic pipeline from FAIDAS-UPH ensures rigorously trained annotators and researchers at competitive cost structures.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TOOLS
+     ➜ Untuk menambah tool baru: copy satu blok .tool-card
+       dan update data-url, tool-name, tool-desc, tool-feature
+============================================================ -->
+<section id="tools">
+  <div class="section-inner">
+    <div class="section-label reveal">Internal Tools</div>
+    <h2 class="section-title reveal">AIT Toolbox</h2>
+
+    <div class="tools-grid">
+
+      <!-- TOOL 1: Writing Tool -->
+      <div class="tool-card reveal" data-url="https://writing-ait.vercel.app/" onclick="launchTool(this)">
+        <div class="tool-tag">AIT-wt</div>
+        <div class="tool-name">Writing<br>Tool</div>
+        <p class="tool-desc">
+          AI-powered content generation for articles, reviews, features, and more.
+          Multi-language support with various POV and style options.
+        </p>
+        <div class="tool-features">
+          <span class="tool-feature">Gemini 2.5</span>
+          <span class="tool-feature">ID / EN / ZH</span>
+          <span class="tool-feature">Soft Selling</span>
+          <span class="tool-feature">FAQ</span>
+          <span class="tool-feature">Grounding</span>
+        </div>
+        <div class="tool-cta">
+          <span>Launch Tool</span>
+          <div class="tool-cta-arrow">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="tool-progress"></div>
+      </div>
+
+      <!-- TOOL 2: Annotation Tool -->
+      <div class="tool-card reveal" data-url="https://ait-annotator-qc-project.vercel.app/" onclick="launchTool(this)">
+        <div class="tool-tag">AIT-at</div>
+        <div class="tool-name">Annotation<br>Tool</div>
+        <p class="tool-desc">
+          Fast text processing for annotation and quality control.
+          Algorithmic fixer, batch edit, and multi-model AI support.
+        </p>
+        <div class="tool-features">
+          <span class="tool-feature">V2.2 Beta</span>
+          <span class="tool-feature">Auto Fix</span>
+          <span class="tool-feature">Batch Edit</span>
+          <span class="tool-feature">QC Mode</span>
+          <span class="tool-feature">Gemini / Groq</span>
+        </div>
+        <div class="tool-cta">
+          <span>Launch Tool</span>
+          <div class="tool-cta-arrow">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="tool-progress"></div>
+      </div>
+
+      <!-- TOOL 3+ : Tambah tool baru di sini -->
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     TEAM
+     ➜ Untuk menambah anggota: copy satu blok .team-card
+       dan update nama, inisial, role, bio
+============================================================ -->
+<section id="team">
+  <div class="section-inner">
+    <div class="section-label reveal">The Crew</div>
+    <h2 class="section-title reveal">Ancur Ini Tim</h2>
+    <p class="reveal" style="color:var(--gray); max-width:500px; font-size:0.9rem; margin-bottom:0;">
+      Hover atau tap kartu untuk flip.
+    </p>
+    <p class="team-hint reveal">↕ Hover / Tap to flip</p>
+
+    <div class="team-grid">
+
+      <!-- Fadhil -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">FG</div>
+            <div class="team-name">Fadhil</div>
+            <div class="team-title-front">Chief System Architect</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Chief System<br>Architect</div>
+            <p class="team-bio">Suka bikin sistem dari nol. Kalau ada yang bisa diotomasi, pasti diotomasi.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Annis -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">AN</div>
+            <div class="team-name">Annis</div>
+            <div class="team-title-front">Supreme Commander</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Supreme<br>Commander</div>
+            <p class="team-bio">Leader sejati. Kalau ada yang kacau, Annis yang benerin.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rama -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">RM</div>
+            <div class="team-name">Rama</div>
+            <div class="team-title-front">Rapid Response Specialist</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Rapid Response<br>Specialist</div>
+            <p class="team-bio">Si paling gesit. Selesai duluan sebelum kamu ngerti soalnya.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sin Sin -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">SS</div>
+            <div class="team-name">Sin Sin</div>
+            <div class="team-title-front">Head of Interrogation & Inquiry</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Head of Interrogation<br>& Inquiry</div>
+            <p class="team-bio">Jenius merangkai pertanyaan. Interviewer terbaik, subject terbingung.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Syaugi -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">SY</div>
+            <div class="team-name">Syaugi</div>
+            <div class="team-title-front">Spiritual AI Advisor</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Spiritual AI<br>Advisor</div>
+            <p class="team-bio">Ulama tim. Kalau ada masalah, tanya Syaugi dulu sebelum Google.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vina -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar female">VN</div>
+            <div class="team-name">Vina</div>
+            <div class="team-title-front">Chief Vibe Officer</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role" style="color:#c0789a;">Chief Vibe<br>Officer</div>
+            <p class="team-bio">Perempuan idaman tim. Vibes-nya selalu positif, output-nya selalu bersih.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Adit -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">AD</div>
+            <div class="team-name">Adit</div>
+            <div class="team-title-front">Director of Chaos & Comedy</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Director of Chaos<br>& Comedy</div>
+            <p class="team-bio">Kocak abis. Mood booster resmi tim. Kalau sepi, panggil Adit.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bayu -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">BY</div>
+            <div class="team-name">Bayu</div>
+            <div class="team-title-front">Senior Mature Operations (21+)</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Senior Mature Ops<br>(21+)</div>
+            <p class="team-bio">Yang paling dewasa. Literally dan figuratively. Wisdom level: maxed.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Raka -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">RK</div>
+            <div class="team-name">Raka</div>
+            <div class="team-title-front">Corporate Frontline Warrior</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Corporate Frontline<br>Warrior</div>
+            <p class="team-bio">Corporate warrior sejati. Deadline? Siap. Pressure? Biasa. Raka? Siap.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aldio -->
+      <div class="team-card reveal" onclick="this.classList.toggle('flipped')">
+        <div class="team-card-inner">
+          <div class="team-front">
+            <div class="team-avatar">AL</div>
+            <div class="team-name">Aldio</div>
+            <div class="team-title-front">Master of Prompting Arts</div>
+          </div>
+          <div class="team-back">
+            <div class="team-role">Master of Prompting<br>Arts & Sudden Sighs</div>
+            <p class="team-bio">Sarjana prompting. Suka mendesah tiba-tiba. Output-nya selalu *chef's kiss*.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /team-grid -->
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+============================================================ -->
+<footer>
+  <div class="footer-logo">A<span>I</span>T</div>
+  <div class="footer-sub">Alpha Innovation Technology</div>
+  <div class="footer-divider"></div>
+  <div class="footer-built">
+    Built with ❤️ by <em>Fadhil Ghifarion 法迪</em>
+  </div>
+  <div class="footer-disclaimer">
+    <span>⚠️ This is an UNOFFICIAL internal hub — made by Ancur Ini Tim, not AIT Corp.</span><br>
+    © 2026 Alpha Innovation Technology. All rights reserved.
+  </div>
+</footer>
+
+<!-- ============================================================
+     SCRIPTS
+============================================================ -->
+<script>
+  /* ---- Cursor ---- */
+  const cursor = document.getElementById('cursor');
+  const trail  = document.getElementById('cursor-trail');
+  let mx = 0, my = 0, tx = 0, ty = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+  (function animCursor() {
+    tx += (mx - tx) * 0.15;
+    ty += (my - ty) * 0.15;
+    cursor.style.transform = `translate(${mx - 7}px, ${my - 7}px)`;
+    trail.style.transform  = `translate(${tx - 18}px, ${ty - 18}px)`;
+    requestAnimationFrame(animCursor);
+  })();
+  document.querySelectorAll('a, button, .tool-card, .team-card, .hero-logo, .hamburger')
+    .forEach(el => {
+      el.addEventListener('mouseenter', () => { cursor.style.transform += ' scale(1.8)'; trail.style.opacity = '0.1'; });
+      el.addEventListener('mouseleave', () => { trail.style.opacity = '0.5'; });
+    });
+
+  /* ---- Scroll progress bar ---- */
+  const bar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  /* ---- Hero title letter reveal ---- */
+  const titleEl = document.getElementById('hero-title');
+  const titleText = 'ALPHA INNOVATION TECHNOLOGY';
+  titleText.split('').forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className = 'char';
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    span.style.transitionDelay = `${0.6 + i * 0.04}s`;
+    titleEl.appendChild(span);
+  });
+
+  /* ---- Particle canvas ---- */
+  const canvas = document.getElementById('particles');
+  const ctx    = canvas.getContext('2d');
+  let particles = [];
+  let W, H;
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  for (let i = 0; i < 60; i++) particles.push({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.5 + 0.3,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    alpha: Math.random() * 0.5 + 0.1,
+  });
+
+  let mouseX = W / 2, mouseY = H / 2;
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+  });
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      const dx = mouseX - p.x, dy = mouseY - p.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) { p.vx += dx * 0.0003; p.vy += dy * 0.0003; }
+      p.x += p.vx; p.y += p.vy;
+      p.vx *= 0.99; p.vy *= 0.99;
+      if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+      if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(139,26,26,${p.alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  /* ---- Load trigger ---- */
+  window.addEventListener('load', () => {
+    setTimeout(() => document.body.classList.add('loaded'), 100);
+  });
+
+  /* ---- Scroll reveal ---- */
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  /* ---- Counter animation ---- */
+  function animCounter(el) {
+    const target  = parseFloat(el.dataset.target);
+    const suffix  = el.dataset.suffix || '';
+    const decimal = el.hasAttribute('data-decimal');
+    const duration = 1800;
+    const start = performance.now();
+    function step(now) {
+      const progress = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      let val = target * ease;
+      if (target >= 1000) {
+        el.textContent = Math.floor(val / 1000) + suffix;
+      } else {
+        el.textContent = (decimal ? val.toFixed(1) : Math.floor(val)) + suffix;
+      }
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const counterObs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animCounter(entry.target);
+        counterObs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  document.querySelectorAll('.stat-number').forEach(el => counterObs.observe(el));
+
+  /* ---- Tool launch ---- */
+  function launchTool(card) {
+    const url = card.dataset.url;
+    card.classList.add('launching');
+    setTimeout(() => window.open(url, '_blank'), 650);
+    setTimeout(() => card.classList.remove('launching'), 900);
+  }
+
+  /* ---- Logo click explosion ---- */
+  document.getElementById('hero-logo').addEventListener('click', () => {
+    const logo = document.getElementById('hero-logo');
+    logo.style.animation = 'none';
+    // burst particles
+    for (let i = 0; i < 20; i++) particles.push({
+      x: W / 2, y: H * 0.35,
+      r: Math.random() * 3 + 1,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.5) * 6,
+      alpha: 0.9,
+    });
+  });
+
+  /* ---- Hamburger ---- */
+  const ham    = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobile-nav');
+  ham.addEventListener('click', () => {
+    ham.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+  });
+  function closeMobileNav() {
+    ham.classList.remove('open');
+    mobileNav.classList.remove('open');
+  }
+</script>
+</body>
+</html>
