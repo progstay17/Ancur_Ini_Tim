@@ -8,8 +8,10 @@ One-page internal hub untuk tim AIT. Berisi link ke tools internal, profil tim, 
 
 ## 🚀 Live Site
 
-Deploy via GitHub Pages:
-`https://<username>.github.io/<repo-name>/`
+Jika GitHub Pages diaktifkan untuk repository ini, alamat proyek biasanya:
+`https://progstay17.github.io/Ancur_Ini_Tim/`
+
+URL tersebut belum dianggap live sampai deployment dan pengaturan Pages diverifikasi.
 
 ---
 
