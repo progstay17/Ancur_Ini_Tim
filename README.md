@@ -6,9 +6,17 @@
 
 # AIT Internal Hub — Unofficial Edition
 
-> ⚠️ **DISCLAIMER: Ini adalah halaman unofficial buatan Ancur Ini Tim. Bukan produk resmi Alpha Innovation Technology.**
+One-page internal hub for team tools, links, and profiles, built as a single-file static site with no build step.
 
-One-page internal hub untuk tim AIT. Berisi link ke tools internal, profil tim, dan info singkat tentang AIT.
+> **Ghifarion** · Engineering Intelligence. Building Legacy.
+
+## On this page
+
+- [Live site](#live-site)
+- [File structure](#struktur-file)
+- [Deploy](#cara-deploy-ke-github-pages)
+- [Add tools](#cara-tambah-tool-baru)
+- [Features](#fitur)
 
 ---
 
